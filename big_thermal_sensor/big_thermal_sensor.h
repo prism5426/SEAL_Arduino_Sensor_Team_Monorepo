@@ -3,6 +3,7 @@
 #include <TouchScreen.h>
 #include "TaskControlBlock.h"
 #include "TimerOne.h"
+#include "thermalSensor.h"
 
 #define LCD_CS A3 // Chip Select goes to Analog 3
 #define LCD_CD A2 // Command/Data goes to Analog 2
@@ -21,3 +22,5 @@
 void insertTask(TCB* node);
 void deleteTask(TCB* node);
 void scheduler();
+
+void thermal_sensor_setup();

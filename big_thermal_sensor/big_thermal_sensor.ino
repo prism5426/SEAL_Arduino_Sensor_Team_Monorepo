@@ -1,15 +1,21 @@
 #include "big_thermal_sensor.h"
 
-
 // tft driver
 Elegoo_TFTLCD tft(LCD_CS, LCD_CD, LCD_WR, LCD_RD, LCD_RESET);
 TouchScreen ts = TouchScreen(XP, YP, XM, YM, 300);
 
 //Task Control Blocks
+TCB thermalSensorTCB;
 
 TCB* head = NULL;
 TCB* taskPtr = NULL;
 TCB* tail = NULL;
+
+// thermal sensor task data
+Adafruit_AMG88xx amg;
+thermalSensorData thData;
+float pixels[AMG_COLS * AMG_ROWS];
+
 
 // timebaseflag
 volatile int timeBaseFlag;
@@ -22,10 +28,18 @@ void setup() {
   Timer1.attachInterrupt(timerISR);
   
   // ..... Initialize other tasks and task data .....
-
+  
    
   // Initialize Display
   tft.reset();
+
+  // Initialize thermal sensor
+  thermal_sensor_setup();
+  thData = {&amg, {}};
+  thermalSensorTCB.task         = &thermalSensorTask;
+  thermalSensorTCB.taskDataPtr  = &thData;
+  thermalSensorTCB.next         = NULL;
+  thermalSensorTCB.prev         = NULL;
   
   uint16_t identifier = tft.readID();
   if(identifier == 0x9325) {
@@ -58,14 +72,35 @@ void setup() {
 
   tft.begin(identifier);
   
-  
+
   // Initialize serial communication
   Serial.begin(9600);
 }
 
+void thermal_sensor_setup() {
+    Serial.println(F("AMG88xx test"));
+
+    bool status;
+    
+    // default settings
+    status = amg.begin();
+    if (!status) {
+        Serial.println("Could not find a valid AMG88xx sensor, check wiring!");
+        while (1);
+    }
+    
+    Serial.println("-- Thermistor Test --");
+
+    Serial.println();
+
+    delay(100); // let sensor boot up
+}
+
 void loop() {
   // put your main code here, to run repeatedly:
-
+  if (1 == timeBaseFlag) {
+      timeBaseFlag = 0;  
+  }
 }
 
 void insertTask(TCB* node) {
@@ -104,13 +139,11 @@ void deleteTask(TCB* node){
     return;
 }
 
-
 void scheduler() {
     while (taskPtr) {
         taskPtr->task(taskPtr->taskDataPtr);
         taskPtr = taskPtr->next;
     }
-    
     taskPtr = head;
 }
 
