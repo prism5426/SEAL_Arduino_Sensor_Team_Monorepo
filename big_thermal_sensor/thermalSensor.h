@@ -1,5 +1,4 @@
 
-
 #include "Adafruit_AMG88xx.h"
 
 #define AMG_COLS 8

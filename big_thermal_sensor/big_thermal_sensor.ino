@@ -26,20 +26,22 @@ void setup() {
   // setup interrupt
   Timer1.initialize(1000);
   Timer1.attachInterrupt(timerISR);
-  
-  // ..... Initialize other tasks and task data .....
-  
    
   // Initialize Display
   tft.reset();
+  pinMode(XM, OUTPUT);
+  pinMode(YM, OUTPUT);
 
   // Initialize thermal sensor
   thermal_sensor_setup();
-  thData = {&amg, {}};
+  thData = {&amg, {0}};
   thermalSensorTCB.task         = &thermalSensorTask;
   thermalSensorTCB.taskDataPtr  = &thData;
   thermalSensorTCB.next         = NULL;
   thermalSensorTCB.prev         = NULL;
+
+  // initialize tasks
+  insertTask(&thermalSensorTCB);
   
   uint16_t identifier = tft.readID();
   if(identifier == 0x9325) {

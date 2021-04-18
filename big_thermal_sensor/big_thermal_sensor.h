@@ -4,6 +4,7 @@
 #include "TaskControlBlock.h"
 #include "TimerOne.h"
 #include "thermalSensor.h"
+#include "display.h"
 
 #define LCD_CS A3 // Chip Select goes to Analog 3
 #define LCD_CD A2 // Command/Data goes to Analog 2
