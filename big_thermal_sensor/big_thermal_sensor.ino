@@ -1,15 +1,25 @@
 #include "big_thermal_sensor.h"
 
+#define PIXEL_DEBUG 1
+
 // tft driver
 Elegoo_TFTLCD tft(LCD_CS, LCD_CD, LCD_WR, LCD_RD, LCD_RESET);
 TouchScreen ts = TouchScreen(XP, YP, XM, YM, 300);
 
 //Task Control Blocks
 TCB thermalSensorTCB;
+TCB displayTCB;
+TCB touchInputTCB;
 
 TCB* head = NULL;
 TCB* taskPtr = NULL;
 TCB* tail = NULL;
+
+// display task data
+displayTaskData dData;
+
+// display history data
+displayHistory dhData;
 
 // thermal sensor task data
 Adafruit_AMG88xx amg;
@@ -22,15 +32,25 @@ volatile int timeBaseFlag;
 unsigned long timeIntv;
 
 void setup() {
+  // Initialize serial communication
+  Serial.begin(9600);
+  
   // put your setup code here, to run once:
   // setup interrupt
   Timer1.initialize(1000);
   Timer1.attachInterrupt(timerISR);
    
-  // Initialize Display
+  // Initialize Display and displayHistory
   tft.reset();
   pinMode(XM, OUTPUT);
   pinMode(YM, OUTPUT);
+  dhData = {};
+  dData = {&tft, &dhData, &thData};
+  displayTCB.task               = &displayTask;
+  displayTCB.taskDataPtr        = &dData;
+  displayTCB.next               = NULL;
+  displayTCB.prev               = NULL;
+  
 
   // Initialize thermal sensor
   thermal_sensor_setup();
@@ -41,7 +61,8 @@ void setup() {
   thermalSensorTCB.prev         = NULL;
 
   // initialize tasks
-  insertTask(&thermalSensorTCB);
+  insertTask(&displayTCB);
+  //insertTask(&thermalSensorTCB);
   
   uint16_t identifier = tft.readID();
   if(identifier == 0x9325) {
@@ -73,10 +94,10 @@ void setup() {
 }
 
   tft.begin(identifier);
-  
 
-  // Initialize serial communication
-  Serial.begin(9600);
+  // initialize black screen
+  tft.fillScreen(BLACK);  
+  
 }
 
 void thermal_sensor_setup() {
@@ -102,6 +123,11 @@ void loop() {
   // put your main code here, to run repeatedly:
   if (1 == timeBaseFlag) {
       timeBaseFlag = 0;  
+
+      scheduler();
+
+      if (PIXEL_DEBUG) print_pixels();
+      Serial.println("1234");
   }
 }
 
@@ -123,7 +149,7 @@ void insertTask(TCB* node) {
 
 void deleteTask(TCB* node){
     if (NULL != head) {
-        if (head == tail) { // TODO check to make sure only node is deleted
+        if (head == tail) { 
             head = NULL;
             tail = NULL;
         } else if (head == node) {
@@ -151,4 +177,14 @@ void scheduler() {
 
 void timerISR() {
     timeBaseFlag = 1;
+}
+
+void print_pixels() {
+    Serial.print("pixels: [");
+    for (int i = 0; i < AMG_COLS * AMG_ROWS; i++) {  
+        Serial.print(pixels[i]);
+        if (i == AMG_COLS * AMG_ROWS - 1) Serial.println("]");
+        else Serial.print(", ");
+    } 
+    Serial.println("]"); 
 }

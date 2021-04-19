@@ -37,12 +37,8 @@
 #include <Arduino.h>
 #include <Elegoo_TFTLCD.h>
 
-#include "Measurement.h"
-#include "Soc.h"
-#include "Contact.h"
-#include "Alarm.h"
 #include "TaskControlBlock.h"
-#include "Accelerometer.h"
+#include "thermalSensor.h"
 
 typedef struct displayHistory {
     
@@ -50,7 +46,8 @@ typedef struct displayHistory {
 
 typedef struct displayTaskData {
     Elegoo_TFTLCD* tft;
-    displayHistory* history;
+    displayHistory* dhData;
+    thermalSensorData* thData;
     
 } displayTaskData;
 
