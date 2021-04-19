@@ -123,11 +123,10 @@ void loop() {
   // put your main code here, to run repeatedly:
   if (1 == timeBaseFlag) {
       timeBaseFlag = 0;  
-
+      
       scheduler();
 
       if (PIXEL_DEBUG) print_pixels();
-      Serial.println("1234");
   }
 }
 
