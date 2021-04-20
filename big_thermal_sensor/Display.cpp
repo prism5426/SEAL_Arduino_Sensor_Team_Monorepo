@@ -48,8 +48,8 @@ void displayInterpolation(Elegoo_TFTLCD tft, void* thData) {
    
     
     int colorTemp;
-    for (int row = 0; row < AMG_ROWS; row++) {
-        for (int col = 0; col < AMG_COLS; col++) {
+    for (int row = 0; row < HD_ROWS; row++) {
+        for (int col = 0; col < HD_COLS; col++) {
             //float val = (data->HDTemp)[row][col];
             float val = get_point(d2d, HD_ROWS, HD_COLS, col, row);
             if(val >= MAXTEMP) colorTemp = MAXTEMP;
