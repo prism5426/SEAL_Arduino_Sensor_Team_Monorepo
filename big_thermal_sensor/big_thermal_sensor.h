@@ -1,6 +1,7 @@
 #include <Elegoo_GFX.h>    // Core graphics library
 #include <Elegoo_TFTLCD.h> // Hardware-specific library
 #include <TouchScreen.h>
+#include <Wire.h>
 #include "TaskControlBlock.h"
 #include "TimerOne.h"
 #include "display.h" // this header file includes "thermalSensor.h"
@@ -25,3 +26,4 @@ void scheduler();
 
 void thermal_sensor_setup();
 void print_pixels();
+void print_HDTemp();

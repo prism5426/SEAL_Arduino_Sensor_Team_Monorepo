@@ -32,6 +32,15 @@
 #define YM 9   // can be a digital pin
 #define XP 8   // can be a digital pin
 
+//low range of the sensor (this will be blue on the screen)
+#define MINTEMP 20
+
+//high range of the sensor (this will be red on the screen)
+#define MAXTEMP 28
+
+#define BOX_WIDTH 10
+#define BOX_HEIGHT 10
+
 #include <stdlib.h>
 #include <stdbool.h>
 #include <Arduino.h>

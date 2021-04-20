@@ -1,6 +1,7 @@
 #include "big_thermal_sensor.h"
 
-#define PIXEL_DEBUG 1
+#define PIXEL_DEBUG 0
+#define HDTEMP_DEBUG 0
 
 // tft driver
 Elegoo_TFTLCD tft(LCD_CS, LCD_CD, LCD_WR, LCD_RD, LCD_RESET);
@@ -25,6 +26,7 @@ displayHistory dhData;
 Adafruit_AMG88xx amg;
 thermalSensorData thData;
 float pixels[AMG_COLS * AMG_ROWS];
+// float HDTemp[HD_ROWS][HD_COLS];   
 
 
 // timebaseflag
@@ -54,7 +56,7 @@ void setup() {
 
   // Initialize thermal sensor
   thermal_sensor_setup();
-  thData = {&amg, {0}};
+  thData = {&amg, pixels, {}, {}};
   thermalSensorTCB.task         = &thermalSensorTask;
   thermalSensorTCB.taskDataPtr  = &thData;
   thermalSensorTCB.next         = NULL;
@@ -62,7 +64,7 @@ void setup() {
 
   // initialize tasks
   insertTask(&displayTCB);
-  //insertTask(&thermalSensorTCB);
+  insertTask(&thermalSensorTCB);
   
   uint16_t identifier = tft.readID();
   if(identifier == 0x9325) {
@@ -125,8 +127,9 @@ void loop() {
       timeBaseFlag = 0;  
       
       scheduler();
-
+      
       if (PIXEL_DEBUG) print_pixels();
+      if (HDTEMP_DEBUG) print_HDTemp();
   }
 }
 
@@ -186,4 +189,17 @@ void print_pixels() {
         else Serial.print(", ");
     } 
     Serial.println("]"); 
+}
+
+void print_HDTemp() {
+    Serial.println("HDTemp: {");
+    for (int i = 0; i < HD_COLS; i++) {
+        for (int j = 0; j < HD_ROWS; j++) {
+            Serial.print(thData.HDTemp[i][j]);
+            Serial.print(", ");
+        }  
+        Serial.println("}");
+        
+    } 
+    Serial.println("}"); 
 }
