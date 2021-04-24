@@ -36,7 +36,7 @@
 #define MINTEMP 20
 
 //high range of the sensor (this will be red on the screen)
-#define MAXTEMP 31
+#define MAXTEMP 29
 
 #define BOX_WIDTH 10
 #define BOX_HEIGHT 10

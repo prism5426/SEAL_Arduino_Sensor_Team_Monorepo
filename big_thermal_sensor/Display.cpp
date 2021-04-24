@@ -45,12 +45,9 @@ void displayInterpolation(Elegoo_TFTLCD tft, void* thData) {
     
     interpolate_image(*(data->pixels), AMG_ROWS, AMG_COLS, d2d, HD_ROWS, HD_COLS);
 
-   
-    
     int colorTemp;
     for (int row = 0; row < HD_ROWS; row++) {
         for (int col = 0; col < HD_COLS; col++) {
-            //float val = (data->HDTemp)[row][col];
             float val = get_point(d2d, HD_ROWS, HD_COLS, col, row);
             if(val >= MAXTEMP) colorTemp = MAXTEMP;
             else if(val <= MINTEMP) colorTemp = MINTEMP;
@@ -70,8 +67,8 @@ void displayTask(void* dData) {
    
    //displayThermalArray(*(data->tft), data->thData);
 
-   //noInterrupts();
+   noInterrupts();
    
    displayInterpolation(*(data->tft), data->thData);
-   //interrupts();
+   interrupts();
 }

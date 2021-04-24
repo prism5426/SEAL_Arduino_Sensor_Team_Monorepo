@@ -1,7 +1,7 @@
 #include "big_thermal_sensor.h"
 
 #define PIXEL_DEBUG 0
-#define HDTEMP_DEBUG 0
+#define DIST_DEBUG 1
 
 // tft driver
 Elegoo_TFTLCD tft(LCD_CS, LCD_CD, LCD_WR, LCD_RD, LCD_RESET);
@@ -11,6 +11,7 @@ TouchScreen ts = TouchScreen(XP, YP, XM, YM, 300);
 TCB thermalSensorTCB;
 TCB displayTCB;
 TCB touchInputTCB;
+TCB ultrasonicTCB;
 
 TCB* head = NULL;
 TCB* taskPtr = NULL;
@@ -26,8 +27,11 @@ displayHistory dhData;
 Adafruit_AMG88xx amg;
 thermalSensorData thData;
 float pixels[AMG_COLS * AMG_ROWS];
-// float HDTemp[HD_ROWS][HD_COLS];   
+float HDTemp[HD_ROWS * HD_COLS];   
 
+// ultrasonic sensor task data
+ultrasonicData usData;
+float distance;
 
 // timebaseflag
 volatile int timeBaseFlag;
@@ -56,15 +60,26 @@ void setup() {
 
   // Initialize thermal sensor
   thermal_sensor_setup();
-  thData = {&amg, pixels, {}, {}};
+  thData = {&amg, pixels, HDTemp};
   thermalSensorTCB.task         = &thermalSensorTask;
   thermalSensorTCB.taskDataPtr  = &thData;
   thermalSensorTCB.next         = NULL;
   thermalSensorTCB.prev         = NULL;
 
+  // Initialize ultrasonic sensor
+  pinMode(TRIG_PIN, OUTPUT);
+  pinMode(ECHO_PIN, INPUT);
+  usData = {&distance};
+  ultrasonicTCB.task            = &ultrasonicTask;
+  ultrasonicTCB.taskDataPtr     = &usData;
+  ultrasonicTCB.next            = NULL;
+  ultrasonicTCB.prev            = NULL;
+  
+
   // initialize tasks
   insertTask(&displayTCB);
   insertTask(&thermalSensorTCB);
+  insertTask(&ultrasonicTCB);
   
   uint16_t identifier = tft.readID();
   if(identifier == 0x9325) {
@@ -129,7 +144,7 @@ void loop() {
       scheduler();
       
       if (PIXEL_DEBUG) print_pixels();
-      if (HDTEMP_DEBUG) print_HDTemp();
+      if (DIST_DEBUG) print_distance();
   }
 }
 
@@ -191,15 +206,7 @@ void print_pixels() {
     Serial.println("]"); 
 }
 
-void print_HDTemp() {
-    Serial.println("HDTemp: {");
-    for (int i = 0; i < HD_COLS; i++) {
-        for (int j = 0; j < HD_ROWS; j++) {
-            Serial.print(thData.HDTemp[i][j]);
-            Serial.print(", ");
-        }  
-        Serial.println("}");
-        
-    } 
-    Serial.println("}"); 
+void print_distance() {
+    Serial.print("distance = ");
+    Serial.println(distance);  
 }

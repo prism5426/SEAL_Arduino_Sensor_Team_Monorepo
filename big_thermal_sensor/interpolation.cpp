@@ -1,4 +1,5 @@
 #include <Arduino.h>
+#include "thermalSensor.h"
 
 float get_point(float *p, uint8_t rows, uint8_t cols, int8_t x, int8_t y);
 void set_point(float *p, uint8_t rows, uint8_t cols, int8_t x, int8_t y,

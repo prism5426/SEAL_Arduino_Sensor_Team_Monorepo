@@ -10,8 +10,7 @@
 typedef struct thermalSensorData {
     Adafruit_AMG88xx* amg;
     float* pixels[AMG_COLS * AMG_ROWS];
-    float HDTemp[HD_ROWS][HD_COLS]; 
-    float* dest_2d[HD_ROWS * HD_COLS];
+    float* HDTemp[AMG_COLS * AMG_ROWS]; // this just doesn't work, need help
 } thermalSensorData;
 
 void thermalSensorTask (void*);
