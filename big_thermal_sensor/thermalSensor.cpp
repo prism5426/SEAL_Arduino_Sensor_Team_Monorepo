@@ -1,3 +1,4 @@
+
 #include "thermalSensor.h"
 
 // variables for row/column interpolation
@@ -17,7 +18,8 @@ void interpolate(float* pixels[AMG_COLS * AMG_ROWS], float HDTemp[HD_ROWS][HD_CO
 // TODO: add color interpolation
 void thermalSensorTask(void* thData) {
     thermalSensorData* data = (thermalSensorData*) thData;
-
-    updateThermalData(data->pixels, data->amg);
+    if (*(data->thermalCam)) {
+       updateThermalData(data->pixels, data->amg);
     //interpolate(data->pixels, data->HDTemp);
+    }
 }

@@ -1,3 +1,4 @@
+#pragma once
 
 #include "Adafruit_AMG88xx.h"
 
@@ -8,6 +9,7 @@
 #define HD_ROWS 24
 
 typedef struct thermalSensorData {
+    bool* thermalCam;
     Adafruit_AMG88xx* amg;
     float* pixels[AMG_COLS * AMG_ROWS];
     float* HDTemp[AMG_COLS * AMG_ROWS]; // this just doesn't work, need help

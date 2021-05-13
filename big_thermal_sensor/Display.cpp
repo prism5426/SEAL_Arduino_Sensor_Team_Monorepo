@@ -38,27 +38,37 @@ void update_displayThermalArray(Elegoo_TFTLCD tft, void* thData, void* dhData) {
    thermalSensorData* data = (thermalSensorData*) thData;  
 }
 
-void displayInterpolation(Elegoo_TFTLCD tft, void* thData) {
+void displayInterpolation(Elegoo_TFTLCD tft, void* thData, bool* prev_thermalCam) {
     thermalSensorData* data = (thermalSensorData*) thData;
 
-    float d2d[HD_ROWS * HD_COLS];
+    if (*(data->thermalCam)) {
+        float d2d[HD_ROWS * HD_COLS];
     
-    interpolate_image(*(data->pixels), AMG_ROWS, AMG_COLS, d2d, HD_ROWS, HD_COLS);
-
-    int colorTemp;
-    for (int row = 0; row < HD_ROWS; row++) {
-        for (int col = 0; col < HD_COLS; col++) {
-            float val = get_point(d2d, HD_ROWS, HD_COLS, col, row);
-            if(val >= MAXTEMP) colorTemp = MAXTEMP;
-            else if(val <= MINTEMP) colorTemp = MINTEMP;
-            else colorTemp = val; 
-
-            uint8_t colorIndex = map(colorTemp, MINTEMP, MAXTEMP, 0, 255);
-            colorIndex = constrain(colorIndex, 0, 255);
-            //draw the pixels!
-            tft.fillRect(BOX_WIDTH * col, BOX_HEIGHT * row, BOX_WIDTH, BOX_HEIGHT, camColors[colorIndex]);
+        interpolate_image(*(data->pixels), AMG_ROWS, AMG_COLS, d2d, HD_ROWS, HD_COLS);
+    
+        int colorTemp;
+        for (int row = 0; row < HD_ROWS; row++) {
+            for (int col = 0; col < HD_COLS; col++) {
+                float val = get_point(d2d, HD_ROWS, HD_COLS, col, row);
+                if(val >= MAXTEMP) colorTemp = MAXTEMP;
+                else if(val <= MINTEMP) colorTemp = MINTEMP;
+                else colorTemp = val; 
+    
+                uint8_t colorIndex = map(colorTemp, MINTEMP, MAXTEMP, 0, 255);
+                colorIndex = constrain(colorIndex, 0, 255);
+                //draw the pixels!
+                tft.fillRect(BOX_WIDTH * col, BOX_HEIGHT * row, BOX_WIDTH, BOX_HEIGHT, camColors[colorIndex]);
+            }
         }
+    } else if (*prev_thermalCam){
+        tft.fillScreen(BLACK);
+        tft.setCursor(0, 0);
+        tft.setTextSize(2);
+        tft.setTextColor(RED);
+        tft.println("No object within 6ft");
+        tft.println("Thermal Camera disabled");
     }
+    *prev_thermalCam = *(data->thermalCam);
 }
 
 void displayTask(void* dData) {
@@ -66,9 +76,6 @@ void displayTask(void* dData) {
    displayHistory* dhData = data->dhData;
    
    //displayThermalArray(*(data->tft), data->thData);
-
-   noInterrupts();
    
-   displayInterpolation(*(data->tft), data->thData);
-   interrupts();
+   displayInterpolation(*(data->tft), data->thData, dhData->prev_thermalCam);
 }

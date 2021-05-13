@@ -1,7 +1,7 @@
 #include "big_thermal_sensor.h"
 
 #define PIXEL_DEBUG 0
-#define DIST_DEBUG 1
+#define DIST_DEBUG 0
 
 // tft driver
 Elegoo_TFTLCD tft(LCD_CS, LCD_CD, LCD_WR, LCD_RD, LCD_RESET);
@@ -12,6 +12,7 @@ TCB thermalSensorTCB;
 TCB displayTCB;
 TCB touchInputTCB;
 TCB ultrasonicTCB;
+TCB alarmTCB;
 
 TCB* head = NULL;
 TCB* taskPtr = NULL;
@@ -32,10 +33,14 @@ float HDTemp[HD_ROWS * HD_COLS];
 // ultrasonic sensor task data
 ultrasonicData usData;
 float distance;
+bool thermalCam = 0;
+bool prev_thermalCam;
 
-// timebaseflag
-volatile int timeBaseFlag;
-unsigned long timeIntv;
+// alarm task data
+alarmData aData;
+bool alarmStatus;
+TIMER_STATE state = TIMER_STATE_HALT;
+uint16_t blinkRate = 0;
 
 void setup() {
   // Initialize serial communication
@@ -43,15 +48,15 @@ void setup() {
   
   // put your setup code here, to run once:
   // setup interrupt
-  Timer1.initialize(1000);
-  Timer1.attachInterrupt(timerISR);
+//  Timer1.initialize(1000);
+//  Timer1.attachInterrupt(timerISR);
    
   // Initialize Display and displayHistory
   tft.reset();
   pinMode(XM, OUTPUT);
   pinMode(YM, OUTPUT);
-  dhData = {};
-  dData = {&tft, &dhData, &thData};
+  dhData                        = {&prev_thermalCam};
+  dData                         = {&tft, &dhData, &thData};
   displayTCB.task               = &displayTask;
   displayTCB.taskDataPtr        = &dData;
   displayTCB.next               = NULL;
@@ -60,7 +65,7 @@ void setup() {
 
   // Initialize thermal sensor
   thermal_sensor_setup();
-  thData = {&amg, pixels, HDTemp};
+  thData                        = {&thermalCam, &amg, pixels, HDTemp};
   thermalSensorTCB.task         = &thermalSensorTask;
   thermalSensorTCB.taskDataPtr  = &thData;
   thermalSensorTCB.next         = NULL;
@@ -69,17 +74,25 @@ void setup() {
   // Initialize ultrasonic sensor
   pinMode(TRIG_PIN, OUTPUT);
   pinMode(ECHO_PIN, INPUT);
-  usData = {&distance};
+  usData                        = {&distance, &thermalCam};
   ultrasonicTCB.task            = &ultrasonicTask;
   ultrasonicTCB.taskDataPtr     = &usData;
   ultrasonicTCB.next            = NULL;
   ultrasonicTCB.prev            = NULL;
-  
+
+  // Initialize alarm led
+  timer_init();
+  aData                         = {&usData, &alarmStatus, &state, &blinkRate, pixels};
+  alarmTCB.task                 = &alarmTask;
+  alarmTCB.taskDataPtr          = &aData;
+  alarmTCB.next                 = NULL;
+  alarmTCB.prev                 = NULL;
 
   // initialize tasks
   insertTask(&displayTCB);
   insertTask(&thermalSensorTCB);
   insertTask(&ultrasonicTCB);
+  insertTask(&alarmTCB);
   
   uint16_t identifier = tft.readID();
   if(identifier == 0x9325) {
@@ -137,15 +150,10 @@ void thermal_sensor_setup() {
 }
 
 void loop() {
-  // put your main code here, to run repeatedly:
-  if (1 == timeBaseFlag) {
-      timeBaseFlag = 0;  
-      
-      scheduler();
-      
-      if (PIXEL_DEBUG) print_pixels();
-      if (DIST_DEBUG) print_distance();
-  }
+    scheduler();
+    if (PIXEL_DEBUG) print_pixels();
+    if (DIST_DEBUG) print_distance();
+  
 }
 
 void insertTask(TCB* node) {
@@ -190,10 +198,6 @@ void scheduler() {
         taskPtr = taskPtr->next;
     }
     taskPtr = head;
-}
-
-void timerISR() {
-    timeBaseFlag = 1;
 }
 
 void print_pixels() {

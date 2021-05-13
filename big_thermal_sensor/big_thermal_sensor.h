@@ -3,9 +3,9 @@
 #include <TouchScreen.h>
 #include <Wire.h>
 #include "TaskControlBlock.h"
-#include "TimerOne.h"
 #include "display.h" // this header file includes "thermalSensor.h"
 #include "ultrasonic.h"
+#include "alarm.h"
 
 #define LCD_CS A3 // Chip Select goes to Analog 3
 #define LCD_CD A2 // Command/Data goes to Analog 2

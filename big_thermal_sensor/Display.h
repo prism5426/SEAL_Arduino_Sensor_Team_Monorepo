@@ -50,7 +50,7 @@
 #include "thermalSensor.h"
 
 typedef struct displayHistory {
-    
+    bool* prev_thermalCam;
 } displayHistory;
 
 typedef struct displayTaskData {
