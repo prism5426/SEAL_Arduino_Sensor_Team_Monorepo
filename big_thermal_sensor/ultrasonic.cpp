@@ -1,10 +1,12 @@
 #include "ultrasonic.h"
 
 void updateDistance(float* distance) {
+    // generate a 10us high pulse to drive the trig pin
     digitalWrite(TRIG_PIN, HIGH);
     delayMicroseconds(10);
     digitalWrite(TRIG_PIN, LOW);
 
+    // echo pin
     long duration = pulseIn(ECHO_PIN, HIGH);
     
     *distance = duration*0.034/2;
