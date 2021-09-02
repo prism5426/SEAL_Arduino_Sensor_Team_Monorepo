@@ -33,7 +33,7 @@
 #define XP 8   // can be a digital pin
 
 //low range of the sensor (this will be blue on the screen)
-#define MINTEMP 10
+#define MINTEMP 20
 
 //high range of the sensor (this will be red on the screen)
 #define MAXTEMP 29
@@ -45,12 +45,9 @@
 #include <stdbool.h>
 #include <Arduino.h>
 #include <Elegoo_TFTLCD.h>
-#include <SparkFun_VL53L1X.h>
 
 #include "TaskControlBlock.h"
 #include "thermalSensor.h"
-
-extern float MaxTemp;
 
 typedef struct displayHistory {
     bool* prev_thermalCam;
@@ -59,7 +56,8 @@ typedef struct displayHistory {
 typedef struct displayTaskData {
     Elegoo_TFTLCD* tft;
     displayHistory* dhData;
-    thermalSensorData* thData; 
+    thermalSensorData* thData;
+    
 } displayTaskData;
 
 void displayTask(void*);
