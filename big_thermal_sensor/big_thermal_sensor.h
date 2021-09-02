@@ -2,7 +2,7 @@
 #include <Elegoo_TFTLCD.h> // Hardware-specific library
 #include <TouchScreen.h>
 #include <Wire.h>
-#include <SparkFun_VL53L1X.h>
+#include <VL53L1X.h>
 #include "TaskControlBlock.h"
 #include "display.h" // this header file includes "thermalSensor.h"
 #include "alarm.h"
