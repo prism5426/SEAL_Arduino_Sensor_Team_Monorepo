@@ -1,11 +1,14 @@
 #include "tof.h"
 
-void updateDistance(VL53L1X* sensor, float* distance, bool* thermalCam) {
-   // sensor reads in "mm", distance in "cm"
-   *distance = (*sensor).read() / 10;
-   *thermalCam = *distance <= 200 ? 1 : 0;
-   Serial.print("distance = ");
-   Serial.println(*distance);
+void updateDistance(SFEVL53L1X *sensor, float *distance, bool *thermalCam)
+{
+    while (!(*sensor).checkForDataReady())
+    {
+        delay(1);
+    }
+    // sensor reads in "mm", distance in "mm"
+    *distance = (*sensor).getDistance();
+    *thermalCam = *distance <= 1830 ? 1 : 0; // turn on when distance less than 1830mm (~6ft)
 }
 
 void tofSensorTask(void* tofData){
