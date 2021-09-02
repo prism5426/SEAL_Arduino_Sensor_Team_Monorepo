@@ -1,5 +1,12 @@
 #include "Display.h"
 
+// To-Do: implement dynamic threshold that adjusts with distance
+//low range of the sensor (this will be blue on the screen)
+#define MINTEMP 10
+
+//high range of the sensor (this will be red on the screen)
+#define MAXTEMP 29
+
 //the colors we will be using
 const uint16_t camColors[] = {0x480F,
 0x400F,0x400F,0x400F,0x4010,0x3810,0x3810,0x3810,0x3810,0x3010,0x3010,
@@ -33,36 +40,57 @@ void update_displayThermalArray(Elegoo_TFTLCD tft, void* thData, void* dhData) {
    thermalSensorData* data = (thermalSensorData*) thData;  
 }
 
+
+// dynamic threshold code start
+SFEVL53L1X tof;
+// dynamic threshold code end
+
+float MaxTemp;
+
 void displayInterpolation(Elegoo_TFTLCD tft, void* thData, bool* prev_thermalCam) {
     thermalSensorData* data = (thermalSensorData*) thData;
 
-    if (*(data->thermalCam)) {
+//    if (*(data->thermalCam)) {
         float d2d[HD_ROWS * HD_COLS];
     
         interpolate_image(*(data->pixels), AMG_ROWS, AMG_COLS, d2d, HD_ROWS, HD_COLS);
     
         int colorTemp;
+        MaxTemp = MAXTEMP;
+
+        // dynamic threshold code start
+        int distanceValue = (tof.getDistance()) / 304.8;
+        if (distanceValue < 1) MaxTemp = 30;
+        else if ((distanceValue >= 1) && (distanceValue < 2)) MaxTemp = 28;
+        else if ((distanceValue >= 2) && (distanceValue < 3)) MaxTemp = 26.5;
+        else if ((distanceValue >= 3) && (distanceValue < 4)) MaxTemp = 26;
+        else if ((distanceValue >= 4) && (distanceValue < 5)) MaxTemp = 24;
+        else if ((distanceValue >= 5) && (distanceValue < 6)) MaxTemp = 23;
+        else if (distanceValue > 6) MaxTemp = 22;
+        // dynamic threshold code end
+
         for (int row = 0; row < HD_ROWS; row++) {
             for (int col = 0; col < HD_COLS; col++) {
                 float val = get_point(d2d, HD_ROWS, HD_COLS, col, row);
-                if(val >= MAXTEMP) colorTemp = MAXTEMP;
+                if(val >= MaxTemp) colorTemp = MaxTemp;
                 else if(val <= MINTEMP) colorTemp = MINTEMP;
                 else colorTemp = val; 
     
-                uint8_t colorIndex = map(colorTemp, MINTEMP, MAXTEMP, 0, 255);
+                uint8_t colorIndex = map(colorTemp, MINTEMP, MaxTemp, 0, 255);
                 colorIndex = constrain(colorIndex, 0, 255);
                 //draw the pixels!
                 tft.fillRect(BOX_WIDTH * col, BOX_HEIGHT * row, BOX_WIDTH, BOX_HEIGHT, camColors[colorIndex]);
             }
         }
-    } else if (*prev_thermalCam){
-        tft.fillScreen(BLACK);
-        tft.setCursor(0, 0);
-        tft.setTextSize(2);
-        tft.setTextColor(RED);
-        tft.println("No object within 6ft");
-        tft.println("Thermal Camera disabled");
-    }
+//    } 
+//    else if (*prev_thermalCam){
+//        tft.fillScreen(BLACK);
+//        tft.setCursor(0, 0);
+//        tft.setTextSize(2);
+//        tft.setTextColor(RED);
+//        tft.println("No object within 6ft");
+//        tft.println("Thermal Camera disabled");
+//    }
     *prev_thermalCam = *(data->thermalCam);
 }
 
@@ -71,5 +99,5 @@ void displayTask(void* dData) {
    displayHistory* dhData = data->dhData;
    
    displayInterpolation(*(data->tft), data->thData, dhData->prev_thermalCam);
-   Serial.println("im here");
+//   Serial.println("im here");
 }
