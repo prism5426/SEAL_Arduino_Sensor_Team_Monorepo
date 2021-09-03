@@ -12,8 +12,13 @@ TCB thermalSensorTCB;
 TCB displayTCB;
 TCB touchInputTCB;
 <<<<<<< HEAD
+<<<<<<< HEAD
 TCB ultrasonicTCB;
 TCB alarmTCB;
+=======
+TCB alarmTCB;
+TCB tofTCB;
+>>>>>>> parent of 6998423 (Merge pull request #1 from prism5426/updated-prototype)
 =======
 TCB alarmTCB;
 TCB tofTCB;
@@ -36,9 +41,12 @@ float pixels[AMG_COLS * AMG_ROWS];
 float HDTemp[HD_ROWS * HD_COLS];   
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 // ultrasonic sensor task data
 ultrasonicData usData;
 float distance;
+=======
+>>>>>>> parent of 6998423 (Merge pull request #1 from prism5426/updated-prototype)
 =======
 >>>>>>> parent of 6998423 (Merge pull request #1 from prism5426/updated-prototype)
 bool thermalCam = 0;
@@ -51,6 +59,7 @@ TIMER_STATE state = TIMER_STATE_HALT;
 uint16_t blinkRate = 0;
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 void setup() {
   // Initialize serial communication
   Serial.begin(9600);
@@ -60,6 +69,8 @@ void setup() {
 //  Timer1.initialize(1000);
 //  Timer1.attachInterrupt(timerISR);
 =======
+=======
+>>>>>>> parent of 6998423 (Merge pull request #1 from prism5426/updated-prototype)
 // tof task data
 tofSensorData tofData;
 VL53L1X tof;
@@ -68,6 +79,9 @@ float distance;
 void setup() {
   // Initialize serial communication
   Serial.begin(9600);
+<<<<<<< HEAD
+>>>>>>> parent of 6998423 (Merge pull request #1 from prism5426/updated-prototype)
+=======
 >>>>>>> parent of 6998423 (Merge pull request #1 from prism5426/updated-prototype)
    
   // Initialize Display and displayHistory
@@ -91,6 +105,7 @@ void setup() {
   thermalSensorTCB.prev         = NULL;
 
 <<<<<<< HEAD
+<<<<<<< HEAD
   // Initialize ultrasonic sensor
   pinMode(TRIG_PIN, OUTPUT);
   pinMode(ECHO_PIN, INPUT);
@@ -104,6 +119,8 @@ void setup() {
   timer_init();
   aData                         = {&usData, &alarmStatus, &state, &blinkRate, pixels};
 =======
+=======
+>>>>>>> parent of 6998423 (Merge pull request #1 from prism5426/updated-prototype)
   // Initialize ToF 
   tofSensorInit();
   tofData                       = {&tof, &distance, &thermalCam};
@@ -115,6 +132,9 @@ void setup() {
   // Initialize alarm led
   timer_init();
   aData                         = {&tofData, &alarmStatus, &state, &blinkRate, pixels};
+<<<<<<< HEAD
+>>>>>>> parent of 6998423 (Merge pull request #1 from prism5426/updated-prototype)
+=======
 >>>>>>> parent of 6998423 (Merge pull request #1 from prism5426/updated-prototype)
   alarmTCB.task                 = &alarmTask;
   alarmTCB.taskDataPtr          = &aData;
@@ -125,8 +145,13 @@ void setup() {
   insertTask(&displayTCB);
   insertTask(&thermalSensorTCB);
 <<<<<<< HEAD
+<<<<<<< HEAD
   insertTask(&ultrasonicTCB);
   insertTask(&alarmTCB);
+=======
+  insertTask(&alarmTCB);
+  insertTask(&tofTCB);
+>>>>>>> parent of 6998423 (Merge pull request #1 from prism5426/updated-prototype)
 =======
   insertTask(&alarmTCB);
   insertTask(&tofTCB);
@@ -188,7 +213,10 @@ void thermal_sensor_setup() {
 }
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
+=======
+>>>>>>> parent of 6998423 (Merge pull request #1 from prism5426/updated-prototype)
 void tofSensorInit() {
   tof.setTimeout(500);
   if(!tof.init()) {
@@ -210,13 +238,19 @@ void tofSensorInit() {
   tof.startContinuous(50);
 }
 
+<<<<<<< HEAD
+>>>>>>> parent of 6998423 (Merge pull request #1 from prism5426/updated-prototype)
+=======
 >>>>>>> parent of 6998423 (Merge pull request #1 from prism5426/updated-prototype)
 void loop() {
     scheduler();
     if (PIXEL_DEBUG) print_pixels();
     if (DIST_DEBUG) print_distance();
 <<<<<<< HEAD
+<<<<<<< HEAD
   
+=======
+>>>>>>> parent of 6998423 (Merge pull request #1 from prism5426/updated-prototype)
 =======
 >>>>>>> parent of 6998423 (Merge pull request #1 from prism5426/updated-prototype)
 }
