@@ -1,5 +1,5 @@
 # SEAL_Arduino_Sensor_Team_Monorepo
-Branch for added functionality, derived from main
+Main repo for the team
 
 ---
 

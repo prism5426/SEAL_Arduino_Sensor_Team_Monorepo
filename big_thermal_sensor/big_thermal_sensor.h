@@ -2,6 +2,10 @@
 #include <Elegoo_TFTLCD.h> // Hardware-specific library
 #include <TouchScreen.h>
 #include <Wire.h>
+<<<<<<< HEAD
+=======
+#include <VL53L1X.h>
+>>>>>>> parent of 6998423 (Merge pull request #1 from prism5426/updated-prototype)
 #include "TaskControlBlock.h"
 #include "display.h" // this header file includes "thermalSensor.h"
 #include "ultrasonic.h"

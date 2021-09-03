@@ -78,4 +78,8 @@ void displayTask(void* dData) {
    //displayThermalArray(*(data->tft), data->thData);
    
    displayInterpolation(*(data->tft), data->thData, dhData->prev_thermalCam);
+<<<<<<< HEAD
+=======
+   Serial.println("im here");
+>>>>>>> parent of 6998423 (Merge pull request #1 from prism5426/updated-prototype)
 }
