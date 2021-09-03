@@ -2,11 +2,10 @@
 #include <Elegoo_TFTLCD.h> // Hardware-specific library
 #include <TouchScreen.h>
 #include <Wire.h>
-#include <VL53L1X.h>
 #include "TaskControlBlock.h"
 #include "display.h" // this header file includes "thermalSensor.h"
+#include "ultrasonic.h"
 #include "alarm.h"
-#include "tof.h"
 
 #define LCD_CS A3 // Chip Select goes to Analog 3
 #define LCD_CD A2 // Command/Data goes to Analog 2
@@ -27,7 +26,6 @@ void deleteTask(TCB* node);
 void scheduler();
 
 void thermal_sensor_setup();
-void tofSensorInit();
 void print_pixels();
 void print_distance();
 void timerISR();

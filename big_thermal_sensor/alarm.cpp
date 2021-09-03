@@ -43,7 +43,7 @@ void updateAlarm(bool* alarmStatus, uint16_t* blinkRate, bool* thermalCam, float
 
 void alarmTask(void* aData) {
     alarmData* data = (alarmData*)aData;
-    updateAlarm(data->alarmStatus, data->blinkRate, data->tofData->thermalCam, data->pixels, data->tofData->distance, data->state);  
+    updateAlarm(data->alarmStatus, data->blinkRate, data->usData->thermalCam, data->pixels, data->usData->distance, data->state);  
 }
 
 // initialize timer

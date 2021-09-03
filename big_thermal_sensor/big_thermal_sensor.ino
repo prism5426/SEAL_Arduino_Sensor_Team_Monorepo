@@ -11,8 +11,8 @@ TouchScreen ts = TouchScreen(XP, YP, XM, YM, 300);
 TCB thermalSensorTCB;
 TCB displayTCB;
 TCB touchInputTCB;
+TCB ultrasonicTCB;
 TCB alarmTCB;
-TCB tofTCB;
 
 TCB* head = NULL;
 TCB* taskPtr = NULL;
@@ -30,6 +30,9 @@ thermalSensorData thData;
 float pixels[AMG_COLS * AMG_ROWS];
 float HDTemp[HD_ROWS * HD_COLS];   
 
+// ultrasonic sensor task data
+ultrasonicData usData;
+float distance;
 bool thermalCam = 0;
 bool prev_thermalCam;
 
@@ -39,14 +42,14 @@ bool alarmStatus;
 TIMER_STATE state = TIMER_STATE_HALT;
 uint16_t blinkRate = 0;
 
-// tof task data
-tofSensorData tofData;
-VL53L1X tof;
-float distance;
-
 void setup() {
   // Initialize serial communication
   Serial.begin(9600);
+  
+  // put your setup code here, to run once:
+  // setup interrupt
+//  Timer1.initialize(1000);
+//  Timer1.attachInterrupt(timerISR);
    
   // Initialize Display and displayHistory
   tft.reset();
@@ -68,17 +71,18 @@ void setup() {
   thermalSensorTCB.next         = NULL;
   thermalSensorTCB.prev         = NULL;
 
-  // Initialize ToF 
-  tofSensorInit();
-  tofData                       = {&tof, &distance, &thermalCam};
-  tofTCB.task                   = &tofSensorTask;
-  tofTCB.taskDataPtr            = &tofData;
-  tofTCB.next                   = NULL;
-  tofTCB.prev                   = NULL;
+  // Initialize ultrasonic sensor
+  pinMode(TRIG_PIN, OUTPUT);
+  pinMode(ECHO_PIN, INPUT);
+  usData                        = {&distance, &thermalCam};
+  ultrasonicTCB.task            = &ultrasonicTask;
+  ultrasonicTCB.taskDataPtr     = &usData;
+  ultrasonicTCB.next            = NULL;
+  ultrasonicTCB.prev            = NULL;
 
   // Initialize alarm led
   timer_init();
-  aData                         = {&tofData, &alarmStatus, &state, &blinkRate, pixels};
+  aData                         = {&usData, &alarmStatus, &state, &blinkRate, pixels};
   alarmTCB.task                 = &alarmTask;
   alarmTCB.taskDataPtr          = &aData;
   alarmTCB.next                 = NULL;
@@ -87,8 +91,8 @@ void setup() {
   // initialize tasks
   insertTask(&displayTCB);
   insertTask(&thermalSensorTCB);
+  insertTask(&ultrasonicTCB);
   insertTask(&alarmTCB);
-  insertTask(&tofTCB);
   
   uint16_t identifier = tft.readID();
   if(identifier == 0x9325) {
@@ -145,31 +149,11 @@ void thermal_sensor_setup() {
     delay(100); // let sensor boot up
 }
 
-void tofSensorInit() {
-  tof.setTimeout(500);
-  if(!tof.init()) {
-    Serial.println("Failed to detect or initialize ToF sensor");
-    while(1);  
-  }
-  
-  // Use long distance mode and allow up to 50000 us (50 ms) for a measurement.
-  // You can change these settings to adjust the performance of the sensor, but
-  // the minimum timing budget is 20 ms for short distance mode and 33 ms for
-  // medium and long distance modes. See the VL53L1X datasheet for more
-  // information on range and timing limits.
-  tof.setDistanceMode(VL53L1X::Long);
-  tof.setMeasurementTimingBudget(50000);  
-
-  // Start continuous readings at a rate of one measurement every 50 ms (the
-  // inter-measurement period). This period should be at least as long as the
-  // timing budget.
-  tof.startContinuous(50);
-}
-
 void loop() {
     scheduler();
     if (PIXEL_DEBUG) print_pixels();
     if (DIST_DEBUG) print_distance();
+  
 }
 
 void insertTask(TCB* node) {

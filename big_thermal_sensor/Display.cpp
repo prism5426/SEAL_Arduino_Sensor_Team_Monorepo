@@ -29,6 +29,11 @@ const uint16_t camColors[] = {0x480F,
 0xF1E0,0xF1C0,0xF1A0,0xF180,0xF160,0xF140,0xF100,0xF0E0,0xF0C0,0xF0A0,
 0xF080,0xF060,0xF040,0xF020,0xF800};
 
+
+void displayThermalArray(Elegoo_TFTLCD tft, void* thData) {
+    thermalSensorData* data = (thermalSensorData*) thData;
+}
+
 void update_displayThermalArray(Elegoo_TFTLCD tft, void* thData, void* dhData) {
    thermalSensorData* data = (thermalSensorData*) thData;  
 }
@@ -70,6 +75,7 @@ void displayTask(void* dData) {
    displayTaskData* data = (displayTaskData*) dData;
    displayHistory* dhData = data->dhData;
    
+   //displayThermalArray(*(data->tft), data->thData);
+   
    displayInterpolation(*(data->tft), data->thData, dhData->prev_thermalCam);
-   Serial.println("im here");
 }
