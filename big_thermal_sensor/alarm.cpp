@@ -4,30 +4,37 @@ const uint16_t t1_load = 0;
 
 // check distance and other parameters to set alarmStatus flag and blinkRate
 void updateAlarm(bool* alarmStatus, uint16_t* blinkRate, bool* thermalCam, float* pixels[AMG_COLS * AMG_ROWS], float* distance, TIMER_STATE* state) {
-      Serial.print("thermalCam status = ");
-      Serial.println(*thermalCam);
+//      Serial.print("thermalCam status = ");
+//      Serial.println(*thermalCam);
       // check if thermalCam is on
       if (*thermalCam) {
           // turn on timer if not 
           if (*state == TIMER_STATE_HALT) {
               *state = TIMER_STATE_START;
               start_timer();  
-          }
-
+          }  
+          double max_value = (*pixels)[0];       
           // check for person
           *alarmStatus = 0;
           for (int i = 0; i < 64; i++) {
-              if ((*pixels)[i] > MAXTEMP) {
-                  *alarmStatus = 1;
-                  *blinkRate =  300 * RoundUp((uint16_t)(*distance)); // TBD
-                  if (OCR1A == 0 || OCR1A - 1000 > *blinkRate || OCR1A + 1000 < *blinkRate) {
-                      OCR1A = *blinkRate; // person detected, update blinkRate based on distance
-                  }
-                  return;
-              }  
+              if ((*pixels)[i] > max_value) {
+                max_value = (*pixels)[i];
+              }
           }
-          
+          // if the maximum of 64 pixels is greater than maximum threshold (target above ambient temp), flash LED
+          if (max_value >= MaxTemp) {
+                *alarmStatus = 1;
 
+                // if human is less than 3 feet away, blink rapidly
+                if ((RoundUp((uint16_t)(*distance)) / 304.8) < 3) *blinkRate = 80000;
+                // if human is more than 3 feet away, blink slowly
+                else *blinkRate = 30000;
+                
+                if (OCR1A == 0 || OCR1A - 1000 > *blinkRate || OCR1A + 1000 < *blinkRate) {
+                    OCR1A = *blinkRate; // person detected, update blinkRate based on distance
+                }
+                return;
+            }
           // if person not detected
           if (!(*alarmStatus)) {
               stop_timer();
