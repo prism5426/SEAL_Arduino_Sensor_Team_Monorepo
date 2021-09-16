@@ -1,3 +1,9 @@
+#include <ComponentObject.h>
+#include <RangeSensor.h>
+#include <vl53l1x_class.h>
+#include <vl53l1_error_codes.h>
+#include <avr/sleep.h>
+#include "SparkFun_VL53L1X.h" //Click here to get the library: http://librarymanager/All#SparkFun_VL53L1X
 #include <Elegoo_GFX.h>    // Core graphics library
 #include <Elegoo_TFTLCD.h> // Hardware-specific library
 #include <TouchScreen.h>
@@ -6,6 +12,7 @@
 #include "TaskControlBlock.h"
 #include "display.h" // this header file includes "thermalSensor.h"
 #include "alarm.h"
+#include "calibration.h"
 #include "tof.h"
 
 #define LCD_CS A3 // Chip Select goes to Analog 3
@@ -20,6 +27,9 @@
 #define YM 9   // can be a digital pin
 #define XP 8   // can be a digital pin
 
+const uint8_t INTERRUPT_PIN = 19;
+const int Status_LED = 37;
+const int buttonPin = 41;
 
 //function declaration
 void insertTask(TCB* node);

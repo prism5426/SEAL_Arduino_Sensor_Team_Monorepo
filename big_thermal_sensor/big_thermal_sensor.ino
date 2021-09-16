@@ -1,10 +1,3 @@
-#include <ComponentObject.h>
-#include <RangeSensor.h>
-#include <vl53l1x_class.h>
-#include <vl53l1_error_codes.h>
-#include <avr/sleep.h>
-#include <Wire.h>
-#include "SparkFun_VL53L1X.h" //Click here to get the library: http://librarymanager/All#SparkFun_VL53L1X
 #include "big_thermal_sensor.h"
 
 #define PIXEL_DEBUG 1
@@ -12,10 +5,6 @@
 
 //Optional interrupt and shutdown pins.
 #define SHUTDOWN_PIN 18
-
-const byte INTERRUPT_PIN = 19;
-const int Status_LED = 37;
-const int buttonPin = 41;
 
 int buttonState = 0;         // variable for reading the pushbutton status
 
@@ -28,6 +17,7 @@ TCB thermalSensorTCB;
 TCB displayTCB;
 TCB touchInputTCB;
 TCB alarmTCB;
+TCB calibrationTCB;
 TCB tofTCB;
 
 TCB *head = NULL;
@@ -48,6 +38,9 @@ float HDTemp[HD_ROWS * HD_COLS];
 float MIN_TEMP = 25;
 bool thermalCam = 0;
 bool prev_thermalCam;
+
+// calibration task data
+calibrationData cData;
 
 // alarm task data
 alarmData aData;
@@ -115,6 +108,13 @@ void setup(void)
   tofTCB.next = NULL;
   tofTCB.prev = NULL;
 
+  // Initialize calibration
+  cData = {&distance, pixels, &MIN_TEMP};
+  calibrationTCB.task = &alarmTask;
+  calibrationTCB.taskDataPtr = &cData;
+  calibrationTCB.next = NULL;
+  calibrationTCB.prev = NULL;
+
   // Initialize alarm led
   timer_init();
   aData = {&tofData, &alarmStatus, &state, &blinkRate, pixels};
@@ -128,7 +128,8 @@ void setup(void)
   insertTask(&thermalSensorTCB);
   insertTask(&alarmTCB);
   insertTask(&tofTCB);
-
+  insertTask(&calibrationTCB);
+    
   uint16_t identifier = tft.readID();
   if (identifier == 0x9325)
   {
