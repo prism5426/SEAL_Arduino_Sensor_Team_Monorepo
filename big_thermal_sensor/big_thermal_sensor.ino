@@ -115,7 +115,6 @@ void setup(void)
 
   // Initialize calibration
   cData = {&distance, &MIN_TEMP, &TOTAL_MIN_TEMP, &counter, &UPDATE_THRESHOLD, pixels};
-  //cData = {&distance, pixels, &MIN_TEMP, &TOTAL_MIN_TEMP};
   calibrationTCB.task = &alarmTask;
   calibrationTCB.taskDataPtr = &cData;
   calibrationTCB.next = NULL;
@@ -382,6 +381,7 @@ void wakeUp()
   detachInterrupt(digitalPinToInterrupt(INTERRUPT_PIN)); // Remove the interrupt from pin 19;
 }
 
+// time interrupt every 1 second
 ISR(TIMER4_COMPA_vect) {
   ISR_counter++;
   if (ISR_counter = 10) {

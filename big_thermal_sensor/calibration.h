@@ -13,7 +13,7 @@ typedef struct calibrationData {
    float* TOTAL_MIN_TEMP;
    int* counter;
    int* UPDATE_THRESHOLD;
-  float* pixels[AMG_COLS * AMG_ROWS];
+   float* pixels[AMG_COLS * AMG_ROWS];
 } calibrationData;
 
 void calibrationTask(void* cData);
