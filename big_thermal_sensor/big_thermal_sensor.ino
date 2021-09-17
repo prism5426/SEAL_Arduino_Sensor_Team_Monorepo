@@ -6,6 +6,7 @@
 //Optional interrupt and shutdown pins.
 #define SHUTDOWN_PIN 18
 
+int ISR_counter = 0; // this counter is used to make sure the ISR update the bool every 10 seconds
 int buttonState = 0;         // variable for reading the pushbutton status
 
 // tft driver
@@ -41,6 +42,9 @@ bool prev_thermalCam;
 
 // calibration task data
 calibrationData cData;
+float TOTAL_MIN_TEMP = 0;
+int counter = 0;
+int UPDATE_THRESHOLD = 0;
 
 // alarm task data
 alarmData aData;
@@ -55,6 +59,7 @@ SFEVL53L1X distanceSensor(Wire, SHUTDOWN_PIN, INTERRUPT_PIN);
 
 void setup(void)
 {
+  
   // Initialize ToF
   pinMode(Status_LED, OUTPUT);          // Use the led on digital pin 37 to indicate status of Arduino
   pinMode(buttonPin, INPUT);           // Use Button on digital pin 41
@@ -109,7 +114,8 @@ void setup(void)
   tofTCB.prev = NULL;
 
   // Initialize calibration
-  cData = {&distance, pixels, &MIN_TEMP};
+  cData = {&distance, &MIN_TEMP, &TOTAL_MIN_TEMP, &counter, &UPDATE_THRESHOLD, pixels};
+  //cData = {&distance, pixels, &MIN_TEMP, &TOTAL_MIN_TEMP};
   calibrationTCB.task = &alarmTask;
   calibrationTCB.taskDataPtr = &cData;
   calibrationTCB.next = NULL;
@@ -177,6 +183,25 @@ void setup(void)
 
   // initialize black screen
   tft.fillScreen(BLACK);
+
+  cli();
+  TCCR4A = 0;// set entire TCCR1A register to 0
+  TCCR4B = 0;// same for TCCR1B
+  TCNT4  = 0;//initialize counter value to 0
+  
+  // set compare match register for 1hz increments,meet 1s peroid
+  OCR4A = 15624/1;// = (16*10^6) / (1*1024) - 1 (must be <65536)
+  
+  // turn on CTC mode; means the counter is cleared to 0 when the counter values maches OCR4A
+  TCCR4B |= (1 << WGM12);
+  
+  // Set CS12 and CS10 bits for 1024 prescaler
+  TCCR4B |= (1 << CS12) | (1 << CS10);  
+  
+  // enable timer compare interrupt
+  TIMSK4 |= (1 << OCIE4A);
+  sei();
+    
 }
 
 void thermal_sensor_setup()
@@ -215,8 +240,8 @@ void tofSensorRoutine(float distance)
   }
 }
 
-int counter;
-float total_min_value;
+//int counter;
+//float total_min_value;
 
 void loop(void)
 { 
@@ -225,9 +250,9 @@ void loop(void)
   if (DIST_DEBUG) print_distance(); 
   */
   
-  float distance = (distanceSensor.getDistance()) / 304.8;
+  //float distance = (distanceSensor.getDistance()) / 304.8;
   tofSensorRoutine(distance);
-
+ /*
   double min_value = pixels[0];
   for (int i = 0; i < 64; i++) {
     if (pixels[i] < min_value) {
@@ -244,6 +269,7 @@ void loop(void)
     MIN_TEMP = total_min_value / 10;
     total_min_value = 0;
   }
+  */
 //    Serial.print(MIN_TEMP);
 //    Serial.print(",");
 //    Serial.print(min_value);
@@ -354,4 +380,12 @@ void wakeUp()
   digitalWrite(Status_LED, HIGH);                        // Turning LED on
   sleep_disable();                                       // Disable sleep mode
   detachInterrupt(digitalPinToInterrupt(INTERRUPT_PIN)); // Remove the interrupt from pin 19;
+}
+
+ISR(TIMER4_COMPA_vect) {
+  ISR_counter++;
+  if (ISR_counter = 10) {
+    UPDATE_THRESHOLD = 1;
+    ISR_counter = 0;
+  }
 }

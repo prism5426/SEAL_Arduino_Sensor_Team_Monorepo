@@ -9,9 +9,12 @@
 
 typedef struct calibrationData {
    float* distance;
-   float* pixels[AMG_COLS * AMG_ROWS];
    float* MIN_TEMP;
-} clibrationData;
+   float* TOTAL_MIN_TEMP;
+   int* counter;
+   int* UPDATE_THRESHOLD;
+  float* pixels[AMG_COLS * AMG_ROWS];
+} calibrationData;
 
 void calibrationTask(void* cData);
-void updateCalibration(float* distance, float* pixels[AMG_COLS * AMG_ROWS], float* MIN_TEMP, int mode);
+void updateCalibration(float* distance, float* pixels[AMG_COLS * AMG_ROWS],float* TOTAL_MIN_TEMP, float* MIN_TEMP, int* counter, int* UPDATE_THRESHOLD, int mode);
