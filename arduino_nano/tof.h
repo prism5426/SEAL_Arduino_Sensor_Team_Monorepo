@@ -6,8 +6,10 @@ typedef struct tofSensorData {
   SFEVL53L1X* tof;
   float* distance;
   bool* thermalCam;     
+  float* MAX_TEMP;
 } tofSensorData;
 
 void updateDistance(SFEVL53L1X* sensor, float* distance, bool* thermalCam);
 void tofSensorInit(SFEVL53L1X*);
 void tofSensorTask(void*);
+void calibrate(float *MAX_TEMP, float* distance);

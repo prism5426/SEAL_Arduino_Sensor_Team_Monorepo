@@ -10,10 +10,6 @@ void updateThermalData(float* pixels[AMG_COLS * AMG_ROWS], Adafruit_AMG88xx* amg
     (*amg).readPixels(*pixels);
 }
 
-void interpolate(float* pixels[AMG_COLS * AMG_ROWS], float HDTemp[HD_ROWS][HD_COLS]) {
-   
-}
-
 // TODO: add color interpolation
 void thermalSensorTask(void* thData) {
     thermalSensorData* data = (thermalSensorData*) thData;

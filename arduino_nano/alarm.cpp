@@ -3,7 +3,7 @@
 const uint16_t t1_load = 0;
 
 // check distance and other parameters to set alarmStatus flag and blinkRate
-void updateAlarm(bool* alarmStatus, uint16_t* blinkRate, bool* thermalCam, float* pixels[AMG_COLS * AMG_ROWS], float* distance, TIMER_STATE* state) {
+void updateAlarm(bool* alarmStatus, uint16_t* blinkRate, bool* thermalCam, float* pixels[AMG_COLS * AMG_ROWS], float* distance, TIMER_STATE* state, float* MAX_TEMP) {
 //      Serial.print("thermalCam status = ");
 //      Serial.println(*thermalCam);
       // check if thermalCam is on
@@ -21,13 +21,26 @@ void updateAlarm(bool* alarmStatus, uint16_t* blinkRate, bool* thermalCam, float
                 max_value = (*pixels)[i];
               }
           }
-          if (max_value >= MaxTemp) {
+          
+          // if the maximum of 64 pixels is greater than maximum threshold (target above ambient temp), flash LED
+          if (max_value >= *MAX_TEMP) {
                 *alarmStatus = 1;
 
-                // if human is less than 3 feet away, blink rapidly
-                if ((RoundUp((uint16_t)(*distance)) / 304.8) < 3) *blinkRate = 80000;
-                // if human is more than 3 feet away, blink slowly
-                else *blinkRate = 30000;
+                //Serial.print("max: ");
+                //Serial.println(max_value);
+                //Serial.print("blink: ");
+                Serial.println(*blinkRate);
+                // dynamic threshold code start, *MAX_TEMP or *blinkRate
+                if (*distance < 304.8) *blinkRate = 2000; // 1ft 
+                else if (*distance < 609) *blinkRate = 5000; //2ft
+                else if (*distance < 914) *blinkRate = 10000; //3ft
+                else if (*distance < 1219) *blinkRate = 15000; //4ft
+                else if (*distance < 1524) *blinkRate = 30000; //5ft
+                else if (*distance < 1828) *blinkRate = 60000; //6ft
+//                // if human is less than 3 feet away, blink rapidly
+//                if ((RoundUp((uint16_t)(*distance)) / 304.8) < 3) *blinkRate = 80000;
+//                // if human is more than 3 feet away, blink slowly
+//                else *blinkRate = 30000;
                 
                 if (OCR1A == 0 || OCR1A - 1000 > *blinkRate || OCR1A + 1000 < *blinkRate) {
                     OCR1A = *blinkRate; // person detected, update blinkRate based on distance
@@ -49,12 +62,12 @@ void updateAlarm(bool* alarmStatus, uint16_t* blinkRate, bool* thermalCam, float
 
 void alarmTask(void* aData) {
     alarmData* data = (alarmData*)aData;
-    updateAlarm(data->alarmStatus, data->blinkRate, data->tofData->thermalCam, data->pixels, data->tofData->distance, data->state);  
+    updateAlarm(data->alarmStatus, data->blinkRate, data->tofData->thermalCam, data->pixels, data->tofData->distance, data->state, data->MAX_TEMP);  
 }
 
 // initialize timer
 void timer_init() {
-    DDRA |= _BV(ALARM_LED); // set ALARM_LED as output mode
+    PORTD |= _BV(ALARM_LED); // set ALARM_LED as output mode
 
     // Reset timer1 control reg A
     TCCR1A = 0;
@@ -100,12 +113,12 @@ void stop_timer() {
     TCCR1B &= ~_BV(CS10);
     
     // turn off led
-    PORTA &= ~_BV(ALARM_LED); 
+    PORTD &= ~_BV(ALARM_LED); 
 }
 
 ISR(TIMER1_COMPA_vect) {
     // toggle led
-    PORTA ^= _BV(ALARM_LED); 
+    PORTD ^= _BV(ALARM_LED); 
 }
 
 /*ISR(TIMER1_OVF_vect) {

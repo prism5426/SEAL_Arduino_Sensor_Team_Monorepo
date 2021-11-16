@@ -1,10 +1,9 @@
 #pragma once
 
 #include "thermalSensor.h"
-#include "Display.h"
 #include "tof.h"
 
-const int ALARM_LED = PA2; // pin 24
+const int ALARM_LED = PD7; // 
 #define OFFSET 12
 #define HUMAN_TEMP 37
 
@@ -19,6 +18,7 @@ typedef struct alarmData {
     bool* alarmStatus;
     TIMER_STATE* state; 
     uint16_t* blinkRate;
+    float* MAX_TEMP;
     float* pixels[AMG_COLS * AMG_ROWS];
 } alarmData;
 
