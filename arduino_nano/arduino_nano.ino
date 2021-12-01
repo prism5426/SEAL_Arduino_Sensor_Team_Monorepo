@@ -12,6 +12,7 @@
 TCB thermalSensorTCB;
 TCB alarmTCB;
 TCB tofTCB;
+TCB tofTCB2;
 
 TCB *head = NULL;
 TCB *taskPtr = NULL;
@@ -32,8 +33,8 @@ TIMER_STATE state = TIMER_STATE_HALT;
 uint16_t blinkRate = 0;
 
 // tof task data
-tofSensorData tofData;
-float distance;
+tofSensorData tofData, tofData2;
+float distance, distance2;
 SFEVL53L1X distanceSensor(Wire);
 
 void setup(void)
@@ -49,7 +50,7 @@ void setup(void)
   {
     Serial.println("Sensor failed to begin. Please check wiring. Freezing...");
     while (1)
-      ;
+      ; 
   }
       Serial.println("Sensor online!");
   // 8ft is 2438.4 mm -> rounded to 2500mm
@@ -60,7 +61,6 @@ void setup(void)
 
   // Initialize serial communication
 //  Serial.begin(9600);
-  Serial.print("starts here");
 
   // setup calibration
   //attachInterrupt(digitalPinToInterrupt(buttonPin),ISR, RISING);
@@ -80,6 +80,13 @@ void setup(void)
   tofTCB.next = NULL;
   tofTCB.prev = NULL;
 
+  // Initialize ToF2
+  tofData = {&distanceSensor, &distance2, &thermalCam, &MAX_TEMP};
+  tofTCB2.task = &tofSensorTask;
+  tofTCB2.taskDataPtr = &tofData2;
+  tofTCB2.next = NULL;
+  tofTCB2.prev = NULL;
+
   // Initialize alarm led
   timer_init();
   aData = {&tofData, &alarmStatus, &state, &blinkRate, &MAX_TEMP, pixels};
@@ -93,6 +100,7 @@ void setup(void)
   insertTask(&thermalSensorTCB);
   insertTask(&alarmTCB);
   insertTask(&tofTCB);
+  //insertTask(&tofTCB2);
 }
 
 void thermal_sensor_setup()
@@ -113,23 +121,6 @@ void thermal_sensor_setup()
   delay(100); // let sensor boot up
 }
 
-void tofSensorRoutine(float distance)
-{
-  while (!distanceSensor.checkForDataReady())
-  {
-    delay(1);
-  }
-  distanceSensor.clearInterrupt();
-  // 6ft is 1828.8 mm -> rounded to 1830mm
-  if (distance >= 1830)
-  {
-    //        Serial.println();
-    //        Serial.println("No object within 6ft or 1830mm");
-    distanceSensor.clearInterrupt();
-    //        Going_To_Sleep();
-  }
-}
-
 int counter;
 float total_min_value;
 
@@ -137,10 +128,7 @@ void loop(void)
 { 
 //  debugging
 //  if (PIXEL_DEBUG) print_pixels();
-//  if (DIST_DEBUG) print_distance(); 
-//    Serial.println(distance);
-//    Serial.print("max temp = ");
-//    Serial.println(MAX_TEMP);
+    if (DIST_DEBUG) print_distance(); 
     scheduler();
 }
 
@@ -221,28 +209,6 @@ void print_distance()
 {
   Serial.print("distance = ");
   Serial.println(distance);
+  Serial.print("distance2 = ");
+  Serial.println(distance2);
 }
-
-//void Going_To_Sleep()
-//{
-//  Serial.println(F("Entering sleep mode!"));
-//  set_sleep_mode(SLEEP_MODE_PWR_DOWN);
-//  sleep_enable();
-//  noInterrupts();
-//  attachInterrupt(digitalPinToInterrupt(INTERRUPT_PIN), wakeUp, FALLING);
-//  digitalWrite(Status_LED, LOW); // Turn LED off
-//  delay(1000);                  // Wait a second to allow the led to be turned off before going to sleep
-//  Serial.flush();
-//  interrupts();
-//  sleep_cpu();
-//}
-//
-//void wakeUp()
-//{
-//  Serial.println();
-//  Serial.println("Interrupt Fired");                     // Print message to serial monitor
-//  Serial.println("Just woke up!");                       // Next line of code executed after the interrupt
-//  digitalWrite(Status_LED, HIGH);                        // Turning LED on
-//  sleep_disable();                                       // Disable sleep mode
-//  detachInterrupt(digitalPinToInterrupt(INTERRUPT_PIN)); // Remove the interrupt from pin 19;
-//}

@@ -8,6 +8,9 @@ void updateDistance(SFEVL53L1X *sensor, float *distance, bool *thermalCam)
     }
     // sensor reads in "mm", distance in "mm"
     *distance = (*sensor).getDistance();
+    int addr = (*sensor).getI2CAddress();
+    Serial.print("addr = ");
+    Serial.println(addr);
     *thermalCam = *distance <= 1830 ? 1 : 0; // turn on when distance less than 1830mm (~6ft)
 }
 
