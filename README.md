@@ -2,7 +2,7 @@
 Repo used in Arduino Nano for the Arduino Sensors team
 
 ## Sensor Links
-[Adafruit AMG883 IR Thermal Camera](https://www.adafruit.com/product/3538)
+[Adafruit AMG8833 IR Thermal Camera](https://www.adafruit.com/product/3538)
 
 [VL53L1X ToF Sensor with Breakout Board](https://shop.pimoroni.com/products/vl53l1x-breakout)
 
