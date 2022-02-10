@@ -1,5 +1,5 @@
 # SEAL_Arduino_Sensor_Team_Monorepo
-Repo used in Arduino Nano for the Arduino Sensors team
+Repo used in updated Arduino Nano prototype with 2ToF sensors for the Arduino Sensors team
 
 ## Sensor Links
 [Adafruit AMG8833 IR Thermal Camera](https://www.adafruit.com/product/3538)
