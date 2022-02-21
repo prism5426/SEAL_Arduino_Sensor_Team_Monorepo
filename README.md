@@ -1,5 +1,6 @@
 # SEAL_Arduino_Sensor_Team_Monorepo
-Repo used in updated Arduino Nano prototype with 2ToF sensors for the Arduino Sensors team. Includes MATLAB file to show thermal data with interpolation.
+Repo used in updated Arduino Nano prototype with 2ToF sensors for the Arduino Sensors team![Image from iOS (4)](https://user-images.githubusercontent.com/61093711/153973699-3497e650-340b-468d-bb92-1b5d22fc29f1.jpg) Includes MATLAB file to show thermal data with interpolation.
+
 
 ## Sensor Links
 [Adafruit AMG8833 IR Thermal Camera](https://www.adafruit.com/product/3538)
