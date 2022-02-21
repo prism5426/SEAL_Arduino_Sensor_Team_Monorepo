@@ -11,12 +11,18 @@ void updateAlarm(bool* alarmStatus, uint16_t* blinkRate, bool* thermalCam, float
               *state = TIMER_STATE_START;
               start_timer();  
           }  
-          double max_value = (*pixels)[0];       
+          double max_value = (*pixels)[0];
+          double min_value = (*pixels)[0];        
           // check for person
           *alarmStatus = 0;
           for (int i = 0; i < 64; i++) {
               if ((*pixels)[i] > max_value) {
                 max_value = (*pixels)[i];
+              }
+          }
+          for (int i = 0; i < 64; i++) {
+              if ((*pixels)[i] < min_value) {
+                min_value = (*pixels)[i];
               }
           }
 //          Serial.print("max: ");
@@ -25,13 +31,15 @@ void updateAlarm(bool* alarmStatus, uint16_t* blinkRate, bool* thermalCam, float
           if (max_value >= *MAX_TEMP) {
                 *alarmStatus = 1;
 
-//                Serial.print("max: ");
+//                Serial.print("max temp: ");
 //                Serial.println(max_value);
+//                Serial.print("min temp: ");
+//                Serial.println(min_value);
 //                Serial.print("blink: ");
 //                Serial.println(*blinkRate);
 //                Serial.print(F("Distance: "));
-//                Serial.print(*distance);
-//                Serial.println(" mm");
+//                Serial.println((RoundUp((uint16_t)(*distance)) / 304.8));
+////                Serial.println(" mm");
 
                 // dynamic threshold code start, *MAX_TEMP or *blinkRate
                 if (*distance < 304.8) *blinkRate = 2000; // 1ft 

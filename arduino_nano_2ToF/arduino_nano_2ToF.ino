@@ -8,7 +8,7 @@
 #include <avr/sleep.h>
 #include "big_thermal_sensor.h"
 
-#define PIXEL_DEBUG 0
+#define PIXEL_DEBUG 1
 #define DIST_DEBUG 0
 
 //Optional interrupt and shutdown pins.
@@ -140,8 +140,8 @@ float total_min_value;
 void loop(void)
 { 
 //  debugging
-//  if (PIXEL_DEBUG) print_pixels();
-//  if (DIST_DEBUG) print_distance(); 
+    if (PIXEL_DEBUG) print_pixels();
+    if (DIST_DEBUG) print_distance(); 
     scheduler();
 }
 
